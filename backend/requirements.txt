@@ -1,0 +1,6 @@
+fastapi
+uvicorn
+pytrends
+feedparser
+requests
+pandas
