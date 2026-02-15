@@ -5,8 +5,9 @@ from routers import trends
 app = FastAPI(title="Google Trends Visualizer")
 
 origins = [
-    "http://localhost:5173", # Vite default port
+    "http://localhost:5173",
     "http://localhost:3000",
+    "*"  # Allow all origins for production (secure this later if needed)
 ]
 
 app.add_middleware(
