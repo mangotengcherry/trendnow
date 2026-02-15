@@ -1,5 +1,4 @@
-from fastapi import APIRouter, HTTPException
-from typing import List, Optional
+from fastapi import APIRouter
 from services.trend_service import trend_service
 
 router = APIRouter(prefix="/api", tags=["trends"])
@@ -10,24 +9,7 @@ async def get_trends(country: str = "united_states"):
     Get trending keywords for a country.
     Supported countries: 'united_states', 'south_korea'
     """
-    # Map to country code for realtime
-    country_map = {
-        'united_states': 'US',
-        'south_korea': 'KR'
-    }
-    
-    country_code = country_map.get(country, 'US')
-    
-    # Try realtime first
-    realtime_data = trend_service.get_realtime_trending_searches(country_code)
-    
-    if realtime_data:
-        trends = [item['title'] for item in realtime_data]
-    else:
-        # Fallback to daily
-        # Note: trending_searches(pn='united_states')
-        trends = trend_service.get_trending_searches(country)
-        
+    trends = trend_service.get_trending_searches(country)
     return {"trends": trends, "country": country}
 
 @router.get("/related/{keyword}")

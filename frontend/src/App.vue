@@ -1,90 +1,38 @@
 <template>
   <div class="app-container">
     <header class="app-header">
-      <div class="logo">🚀 TrendPulse</div>
-      <p class="subtitle">Real-time Insights from Google Trends</p>
+      <div class="branding">
+        <div class="logo" @click="$router.push('/')">🚀 TrendPulse</div>
+        <p class="subtitle">Real-time Insights</p>
+      </div>
+      
+      <nav class="user-nav">
+        <div v-if="authStore.isAuthenticated" class="user-menu">
+           <span class="user-email">{{ authStore.user?.email }}</span>
+           <router-link to="/profile" class="nav-link">Profile</router-link>
+           <button @click="handleLogout" class="logout-btn">Logout</button>
+        </div>
+        <div v-else>
+           <router-link to="/login" class="login-link">Login</router-link>
+        </div>
+      </nav>
     </header>
 
-    <main class="main-layout">
-      <div class="sidebar">
-        <TrendList 
-          :trends="trends" 
-          :loading="loadingTrends" 
-          :error="error"
-          :country="country"
-          @update:country="changeCountry"
-          @select-trend="selectTrend"
-        />
-      </div>
-      <div class="content">
-        <TrendDetail 
-          :keyword="selectedKeyword"
-          :loading="loadingDetail"
-          :related-data="trendDetail"
-          @close="selectedKeyword = null"
-        />
-      </div>
-    </main>
+    <router-view></router-view>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import TrendList from './components/TrendList.vue';
-import TrendDetail from './components/TrendDetail.vue';
-import apiClient from './services/api';
+import { useAuthStore } from './stores/auth';
+import { useRouter } from 'vue-router';
 
-const trends = ref<string[]>([]);
-const loadingTrends = ref(false);
-const error = ref<string | null>(null);
-const country = ref('united_states');
+const authStore = useAuthStore();
+const router = useRouter();
 
-const selectedKeyword = ref<string | null>(null);
-const loadingDetail = ref(false);
-const trendDetail = ref(null);
-
-const fetchTrends = async (cntry: string) => {
-  loadingTrends.value = true;
-  error.value = null;
-  // trends.value = [];
-  try {
-    const response = await apiClient.get('/trends', {
-      params: { country: cntry }
-    });
-    trends.value = response.data.trends;
-  } catch (err) {
-    console.error(err);
-    error.value = 'Failed to load trends. Please try again.';
-  } finally {
-    loadingTrends.value = false;
-  }
+const handleLogout = () => {
+    authStore.logout();
+    router.push('/login');
 };
-
-const changeCountry = (newCountry: string) => {
-  if (country.value === newCountry) return;
-  country.value = newCountry;
-  fetchTrends(newCountry);
-  selectedKeyword.value = null;
-};
-
-const selectTrend = async (keyword: string) => {
-  selectedKeyword.value = keyword;
-  loadingDetail.value = true;
-  trendDetail.value = null;
-  
-  try {
-    const response = await apiClient.get(`/related/${encodeURIComponent(keyword)}`);
-    trendDetail.value = response.data;
-  } catch (err) {
-    console.error(err);
-  } finally {
-    loadingDetail.value = false;
-  }
-};
-
-onMounted(() => {
-  fetchTrends(country.value);
-});
 </script>
 
 <style>
@@ -99,17 +47,23 @@ body {
   max-width: 1400px;
   margin: 0 auto;
   padding: 20px;
-  height: 100vh;
+  min-height: 100vh;
   box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
 }
 
 .app-header {
   margin-bottom: 24px;
   display: flex;
-  align-items: baseline;
-  gap: 20px;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.branding {
+    display: flex;
+    align-items: baseline;
+    gap: 15px;
 }
 
 .logo {
@@ -117,6 +71,7 @@ body {
   font-weight: 800;
   color: #007bff;
   letter-spacing: -1px;
+  cursor: pointer;
 }
 
 .subtitle {
@@ -125,23 +80,46 @@ body {
   margin: 0;
 }
 
-.main-layout {
-  display: grid;
-  grid-template-columns: 350px 1fr;
-  gap: 24px;
-  flex: 1;
-  min-height: 0; /* Important for scrollable nested children */
+.user-nav {
+    display: flex;
+    gap: 15px;
+    align-items: center;
 }
 
-.sidebar, .content {
-  height: 100%;
-  overflow: hidden;
+.user-email {
+    font-weight: 500;
+    margin-right: 10px;
 }
 
-@media (max-width: 900px) {
-  .main-layout {
-    grid-template-columns: 1fr;
-    grid-template-rows: 400px 1fr;
-  }
+.nav-link {
+    text-decoration: none;
+    color: #333;
+    font-weight: 500;
+}
+
+.nav-link:hover {
+    color: #007bff;
+}
+
+.login-link {
+    background: #007bff;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.logout-btn {
+    background: none;
+    border: 1px solid #ddd;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.logout-btn:hover {
+    background: #f5f5f5;
 }
 </style>

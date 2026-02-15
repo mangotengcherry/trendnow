@@ -1,6 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routers import trends
+from routers import trends, auth
+from database import engine
+import models
+
+# Create database tables
+models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Google Trends Visualizer")
 
@@ -23,3 +28,4 @@ async def root():
     return {"message": "Google Trends Visualizer API is running"}
 
 app.include_router(trends.router)
+app.include_router(auth.router)

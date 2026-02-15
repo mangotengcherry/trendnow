@@ -1,6 +1,10 @@
 fastapi
 uvicorn
-pytrends
+trendspy
 feedparser
 requests
-pandas
+python-jose[cryptography]
+passlib[bcrypt]
+google-auth
+google-auth-oauthlib
+sqlalchemy
