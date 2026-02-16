@@ -10,3 +10,9 @@ frontend/node_modules/
 frontend/dist/
 frontend/.DS_Store
 .DS_Store
+
+# Claude Code
+.claude/
+
+# Database
+*.db
